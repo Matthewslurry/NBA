@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include("./html-files/head.ejs") %>
+<title>My Notes | NoteBook Application</title>
+<body> 
+	
+
+    <%- include("./html-files/nav.ejs") %>
+
+    <div id="content">
+      <div class="scroll">
+        <div class="scrollContainer">
+          <% if(error_msg){ %>
+                      
+            <p class="error_msg"><%= error_msg %></p>
+
+          <% } %>
+          
+          <% if(success_msg){ %>
+            
+            <p class="success_msg"><%= success_msg %></p>
+          <% } %>
+        
+<div class="notes content">
+  <h2>My Notes</h2>
+
+<% if(notes.length > 0) { %>
+  <% notes.forEach(note => { %>
+<a class="single" href="/users/note/<%= note._id %>" >
+  <h3 class="title"><%= note.title.substring(0, 40)  %><% if(note.title.length  >= 40){ %>...<%}else { %><% } %></h3>
+  <p class="body">
+    <%= note.body.substring(0, 40)%><% if(note.body.length  >= 40){ %>...<%}else { %><% } %>
+  </p>
+  <p><%= note.timeAdded %></p>
+  
+</a>
+  <% }) %>
+<% } else{ %>
+  <p>There are no blogs to display.....</p>
+<% } %>
+
+</div><!-- end of scroll -->
+</div>
+</div> <!-- end of content -->
+</div>
+
+
+<%- include("./html-files/footer.ejs") %>
+
+
+<style>
+  .error_msg{
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
+      text-align: center;
+      
+  }
+
+  .success_msg{
+      color: #3c763d;
+      background-color: #ddf0d8;
+      border-color: #d6e9c6;
+      text-align: center;
+  }
+  </style>
+
+</body>
+</html>
+
+
+
+
+

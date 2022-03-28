@@ -1,0 +1,95 @@
+<%- include("./html-files/head.ejs") %>
+<title>Update Details | NoteBook Application</title>
+<body>
+	
+
+    <%- include("./html-files/nav.ejs") %>
+
+        <div id="content">
+          <div class="scroll">
+            <div class="scrollContainer">
+                <% if(error_msg){ %>
+                      
+                  <p class="error_msg"><%= error_msg %></p>
+    
+                <% } %>
+                
+                <% if(success_msg){ %>
+                  
+                  <p class="success_msg"><%= success_msg %></p>
+                <% } %>
+
+                <div class="col_380 float_l">
+                  <div id="contact_form">
+                    <form action="/users/update/<%= user._id %>" method="POST">
+                      <h2><center>Update details</center></h2><br>
+                      
+                      <label for="title">Name:</label>
+                      <input type="text" name='name' value="<%= user.name %>" class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <label for="title">Email:</label>
+                      <input type="text" name='email' value="<%= user.email %>" class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <label for="title">Phone Number:</label>
+                      <input type="text" name='phone' value="<%= user.phone %>" class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <label for="title">Username:</label>
+                      <input type="text" name='username' value="<%= user.username %>" class="input_field" />
+                      <div class="cleaner_h10"></div><br>
+                      
+                      <input type='submit' value='Update'></center>
+              
+                 <div class="cleaner_h10"></div>
+
+                    </form><br><br>
+
+                    <form action="/users/change-password/<%= user._id %>" method="POST">
+                      <h2><center>Change Password</center></h2><br>
+                      
+                      <label for="Name">Old Password:</label><br>
+                      <input type='password'  name='oldPassword' class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <label for="Username">New Password:</label><br>
+                      <input type='password'  name='newPassword'  class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <p>Confirm Password:</p>
+                      <input type='password' name='confirmpassword'  class="input_field" />
+                      <div class="cleaner_h10"></div><br>
+                      
+                      <input type='submit' value='Update'></center>
+              
+                 <div class="cleaner_h10"></div>
+
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+        </div><!-- end of scroll -->
+		</div>
+    </div> <!-- end of content -->
+</div>
+
+
+<%- include("./html-files/footer.ejs") %>
+</body>
+</html>
+            
+
+    <style>
+      .error_msg{
+          color: #a94442;
+          background-color: #f2dede;
+          border-color: #ebccd1;
+          text-align: center;
+          
+      }
+  
+      .success_msg{
+          color: #3c763d;
+          background-color: #ddf0d8;
+          border-color: #d6e9c6;
+          text-align: center;
+      }
+      </style>
+

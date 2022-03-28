@@ -1,0 +1,63 @@
+<%- include("./html-files/head.ejs") %>
+<title>Edit Note | NoteBook Application</title>
+<body>
+	
+
+    <%- include("./html-files/nav.ejs") %>
+
+        <div id="content">
+          <div class="scroll">
+            <div class="scrollContainer">
+			  
+              <div class="panel" id="contactus">
+                <h1>Edit Note </h1>
+                <p>Feel free to make changes.</p>
+                <div class="cleaner_h10"></div>
+				
+                <div class="col_380 float_l">
+                  <div id="contact_form">
+                    <form action="/users/edit/<%= note._id %>" method="POST" enctype="multipart/form-data">
+                      <label for="title">Title:</label>
+                      <input type="text" maxlength="40" name="title" value="<%= note.title %>" id="subject" class="input_field" />
+                      <div class="cleaner_h10"></div>
+                      <label for="message">Note:</label>
+                      <textarea id="text" name="body"  rows="0" cols="0" class="required"><%= note.body %></textarea>
+                      <div class="cleaner_h10"></div>
+                      <label for="image" style="display: none;">Change image:</label>
+                  
+              
+                      <div class="cleaner_h10"></div>
+     
+                      <input type="file" class="input_field" onchange="previewImage(event)" id="image" name="documentimage" value="Add Image"/>
+                      <center><img src="/documentimages/<%= note.image %>" id="previewImageId" style="height:100px; width:100px, " ></center>
+                      <input type="submit" value="Save" id="submit" class="submit_btn float_l" />
+                      <a href="/users/mynotes" class="submit_btn float_r" >Back</a>
+                      
+                    </form>
+                  </div>
+                </div>
+				
+                <div class="col_380 float_r"> </div>
+              </div>
+            </div>
+          </div><!-- end of scroll -->
+		</div>
+    </div> <!-- end of content -->
+</div>
+
+
+<%- include("./html-files/footer.ejs") %>
+<script>
+      // Previewing Image
+      var previewImage = function (event) {
+            let imagefile = event.target.files[0]
+            var image = document.getElementById('previewImageId');
+            let imageURL = URL.createObjectURL(imagefile);
+            image.src = imageURL;
+            document.querySelector('#Imagepreviewername').innerHTML = imagefile.name;
+            $('#imagepreviewer').show();
+        };  
+</script>
+</body>
+</html>
+

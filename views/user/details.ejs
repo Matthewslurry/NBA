@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include("./html-files/head.ejs") %>
+<title>My Notes | NoteBook Application</title>
+    <body>
+
+
+
+
+
+        <%- include("./html-files/nav.ejs") %>
+            <div class="details-content" style="padding-right: 100px; padding-left: 100px;">
+                <h2>
+                    <%= note.title %>
+                </h2>
+                <div class="content">
+                    <p>
+                        <%= note.body %>
+                    </p>
+                    <% if(note.image != 'empty'){ %>
+                          <center><img src="/documentimages/<%= note.image %>" style="height:100px; width:100px, "></center>
+                </div>
+                <a href="/users/edit/<%= note._id %>"><img src="/edit.png" alt="delete icon"
+                        style="height:24px; width:24px"></a>
+                <a class="delete" data-doc="<%- note._id %>"><img src="/trashcan.svg.png" alt="delete icon"
+                        style="height:24px; width:24px"></a> <br>
+                <span class="event-date">
+
+                </span>
+                    <% } else { %>
+                        <a href="/users/edit/<%= note._id %>"><img src="/edit.png" alt="delete icon"
+                            style="height:24px; width:24px"></a>
+                    <a class="delete" data-doc="<%- note._id %>"><img src="/trashcan.svg.png" alt="delete icon"
+                            style="height:24px; width:24px"></a> <br>
+                    <span class="event-date">
+    
+                    </span>
+                   <% } %>
+              
+
+            </div>
+
+
+            <script>
+                const trashcan = document.querySelector('a.delete');
+
+                trashcan.addEventListener('click', (e) => {
+                    const endpoint = `/users/note/${trashcan.dataset.doc}`;
+
+                    fetch(endpoint, {
+                        method: 'DELETE'
+
+                    })
+                        .then((response) => response.json())
+                        .then((data) => window.location.href = data.redirect)
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                })
+
+
+
+            </script>
+    </body>
+
+</html>
