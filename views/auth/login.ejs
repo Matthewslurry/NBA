@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Register | NoteBook Application</title>
+	<title>Login | NoteBook Application</title>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 <!--===============================================================================================-->	
@@ -24,7 +24,10 @@
 	
 <!--===============================================================================================-->
 	<link rel="stylesheet" href="../../css/toastr.css">
-    <link rel="stylesheet" href="../../css/toastr.min.css">
+    <link rel="stylesheet" href="../../css/toastr.min.css" >
+	<link rel="stylesheet" href="../../css/bootstrap.min.css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css">
 	<link rel="stylesheet" href="../../sweetalert2/dist/sweetalert2.min.css">
 </head>
 <body>
@@ -33,7 +36,7 @@
 		<div class="container-login100">
 			<div class="wrap-login100">
 				<div class="login100-pic js-tilt" data-tilt>
-					<img src="../images/img-01.png" alt="IMG">
+					<img src="../../auth/images/img-01.png" alt="IMG">
 				</div>
 
 				<form action="/" method="POST" class="login100-form validate-form">
@@ -84,14 +87,14 @@
 
 	
 <!--===============================================================================================-->	
-	<script src="../vendor/jquery/jquery-3.2.1.min.js"></script>
+	<script src="../../auth/vendor/jquery/jquery-3.2.1.min.js"></script>
 <!--===============================================================================================-->
-	<script src="../vendor/bootstrap/js/popper.js"></script>
-	<script src="../vendor/bootstrap/js/bootstrap.min.js"></script>
+	<script src="../../auth/vendor/bootstrap/js/popper.js"></script>
+	<script src="../../auth/vendor/bootstrap/js/bootstrap.min.js"></script>
 <!--===============================================================================================-->
-	<script src="../vendor/select2/select2.min.js"></script>
+	<script src="../../auth/vendor/select2/select2.min.js"></script>
 <!--===============================================================================================-->
-	<script src="../vendor/tilt/tilt.jquery.min.js"></script>
+	<script src="../../auth/vendor/tilt/tilt.jquery.min.js"></script>
 	<script>
 
 		$('.js-tilt').tilt({
@@ -101,8 +104,8 @@
 <!--===============================================================================================-->
 	<script src="../js/main.js"></script>
 
-	<script src="../../js/toastr.js"></script>
-	<script src="../../js/toastr.min.js"></script>
+	<script src="../../toastr-js/toastr.js"></script>
+	<script src="../../toastr-js/toastr.min.js"></script>
 	<script  src="../../sweetalert2/dist/sweetalert2.min.js"></script>
 	
 	
@@ -122,8 +125,9 @@
 				 input.value = input.value.replace(regex," ");
 			 }
 			 </script>
-	<script>
-	  toastr.options = {
+
+<script>
+	toastr.options = {
 		"closeButton": false,
 		"debug": false,
 		"newestOnTop": true,
@@ -139,10 +143,28 @@
 		"hideEasing": "linear",
 		"showMethod": "fadeIn",
 		"hideMethod": "fadeOut"
-	  }
+	}
 
-	</script>
+</script>
 
+  <% if(error_msg !='' ){ %>
+
+    <script>
+      toastr.error(`<%= error_msg %>`)
+    </script>
+
+    <% } else if(success_msg !='' ) { %>
+
+      <script>
+        toastr.success(`<%= success_msg %>`)
+      </script>
+    <% } else if(error != '' ) { %>
+
+        <script> 
+          toastr.error(`<%= error %>`)
+        </script>
+
+        <% } %>
 
 </body>
 </html>

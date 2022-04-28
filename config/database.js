@@ -1,4 +1,4 @@
 module.exports = {
-    database: 'mongodb://localhost:27017/Note-db',
+    database: 'mongodb://localhost:27017/NBA-DB',
     secret: 'yoursecret'
 }
