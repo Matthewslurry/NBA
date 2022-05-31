@@ -116,7 +116,7 @@ User.findOne({ phone: phone}).then((result) => {
         }
         user.password = hash;
 
-        User.update(query, user, function (err) {
+        User.updateOne(query, user, function (err) {
           if (err) {
             console.log(err);
             return;

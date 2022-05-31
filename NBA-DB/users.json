@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "624ad00fa7be84170d1ed032"
+  },
+  "name": "Afeawo Matthew",
+  "email": "matthewafeawo22@gmail.com",
+  "phone": "0556036088",
+  "username": "slurry",
+  "password": "$2a$10$IMSXKe3k8gLt.lBnjOishuBz8./iB.b6o6yNDpw6DmOe09ilXZg2y",
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6269ab1fa2bc7176f8f2d464"
+  },
+  "name": "Solomon ",
+  "email": "solomonaidoojnr@gmail.com",
+  "phone": "0249584007",
+  "username": "Majesty",
+  "password": "$2a$10$/jlt1NB1HgdkogI9d1CP9.h0rJU3qv8dP/BRxcZLstZzr2EaZxcHy",
+  "__v": 0
+}]

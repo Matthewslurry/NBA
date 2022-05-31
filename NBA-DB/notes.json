@@ -1,0 +1,46 @@
+[{
+  "_id": {
+    "$oid": "624c269a7dd4977fb6984ca8"
+  },
+  "title": "My dream House",
+  "body": "I will build this house when i attain the age of 30.",
+  "image": "(2).jpg",
+  "timeAdded": "4:23:06 AM on 4/5/2022",
+  "createdAt": {
+    "$date": "2022-04-05T11:23:06.868Z"
+  },
+  "updatedAt": {
+    "$date": "2022-04-27T20:33:04.264Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "624d63551993b65bc59d07d0"
+  },
+  "title": "Meeting",
+  "body": "There will be a meeting God willing tommorow",
+  "image": "(7).jpg",
+  "timeAdded": "2:54:29 AM on 4/6/2022",
+  "createdAt": {
+    "$date": "2022-04-06T09:54:30.008Z"
+  },
+  "updatedAt": {
+    "$date": "2022-04-06T09:54:30.008Z"
+  },
+  "__v": 0
+},{
+  "_id": {
+    "$oid": "6269b28ba2bc7176f8f2d681"
+  },
+  "title": "Logos Conference",
+  "body": "Scheduled on the 21st of May 2022 at the main chapel.",
+  "image": "empty",
+  "timeAdded": "2:15:55 PM on 4/27/2022",
+  "createdAt": {
+    "$date": "2022-04-27T21:15:55.482Z"
+  },
+  "updatedAt": {
+    "$date": "2022-04-27T21:15:55.482Z"
+  },
+  "__v": 0
+}]
