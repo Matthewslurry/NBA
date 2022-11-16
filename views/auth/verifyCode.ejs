@@ -40,7 +40,7 @@
 
 				<form action="/verifyCode" method="POST"  class="login100-form validate-form">
 					<span class="login100-form-title" style="font-family:Segoe UI; font-weight:bolder;">
-						Enter Verification code
+						Enter Verification code  
 					</span>
 				
 							
@@ -51,7 +51,11 @@
 							<i class="fa fa-envelope" aria-hidden="true"></i>
 						</span>
 					</div>
+				
 					
+						<span id="result"></span>
+					
+			
 					<div class="container-login100-form-btn">
 						<button class="login100-form-btn" type="submit">
 							Verify
@@ -130,6 +134,10 @@
 				 var regex = /[^a-z @. 0-9]/gi;
 				 input.value = input.value.replace(regex," ");
 			 }
+
+
+		document.getElementById("result").innerHTML= localStorage.getItem("textvalue");
+		
 			 </script>
   <% if(error_msg !='' ){ %>
 

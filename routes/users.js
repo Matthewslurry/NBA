@@ -9,6 +9,7 @@ let User = require("../models/user");
 const Note = require("../models/note");
 const { response } = require("express");
 
+
 //Login Form
 router.get("/", function (req, res) {
   res.render("./auth/login", { title: "login" });
@@ -21,32 +22,63 @@ router.get("/forgotPassword", function (req, res) {
 
 //Create verification code
 router.post("/forgotPassword", function (req, res) {
-  const axios = require("axios");
-  const data = {
-    expiry: 5,
-    length: 6,
-    medium: "sms",
-    message: "%otp_code%, is your verification code. Do NOT give it to anyone.",
-    number: "233556036088",
-    sender_id: "Arkesel",
-    type: "numeric",
-  };
-  const headers = {
-    "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
-  };
-  axios
-    .post("https://sms.arkesel.com/api/otp/generate", data, { headers })
-    .then(
-      (response) => console.log(response),
-      res.redirect("/verifyCode")
-    )
-    .catch((error) => console.log(error));
+  User.findOne({ phone: req.body.phone }).then((user) => {
+    if (user) {
+      const axios = require("axios");
+      const data = {
+        expiry: 5,
+        length: 6,
+        medium: "sms",
+        message: "%otp_code%, is your verification code. Do NOT give it to anyone.",
+        number: req.body.phone,
+        sender_id: "Arkesel",
+        type: "numeric",
+      };
+      const headers = {
+        "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
+      };
+      axios
+        .post("https://sms.arkesel.com/api/otp/generate", data, { headers })
+        .then(
+          (response) => console.log(response),
+          res.redirect("/verifyCode")
+        )
+    } else {
+      console.log("Invalid Phone Number");
+      req.flash("error_msg", "Invalid Phone Number");
+      res.redirect("forgotPassword");
+    }
+  });
+  
 });
+
+
+      
 
 //Get VerificatonCode
 router.get("/verifyCode", function (req, res) {
   res.render("./auth/verifyCode", { title: "verifyCode" });
-});
+//   const phone = req.body.phone;
+//   User.findOne({ phone: phone })
+//     .then((result) => {
+//       if (result) {
+//         res.render("./auth/verifyCode", {
+//           phone: result,
+//           phone: phone,
+//         });
+//       } else {
+//         res.render("./auth/verifyCode", {
+//           phone: result,
+//         });
+//         console.log("No result found");
+//       }
+//     })
+//     .catch((err) => {
+//       console.log(err);
+//     });
+ }
+ );
+
 
 //Verify Code
 router.post("/verifyCode", function (req, res) {
@@ -54,7 +86,7 @@ router.post("/verifyCode", function (req, res) {
   const data = {
     api_key: "Y3phcXhmbHNNaFlBdEtxTmlhSno",
     code: `${req.body.otp}`,
-    number: "233556036088",
+    number: req.body.phone,
   };
   const headers = {
     "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
@@ -85,56 +117,79 @@ router.post("/verifyCode", function (req, res) {
 //Get changePassword
 router.get("/changePassword", function (req, res) {
   res.render("./auth/changePassword", { title: "changePassword" });
-   });
-
-   
-// LOAD FIRST PAGE CHANGE-PASSWORD FORM
-router.get("/changePassword", (req, res) => {
-  res.render("changePassword")
+    const phone = req.body.phone;
 });
+//   User.findOne({ phone: phone }).then((result) => {
+//     if (result) {
+//       res.render("./auth/changePassword", {
+//         user: result,
+//         phone: phone,
+//       });
+//     } else {
+//       res.render("./user/change-password", {
+//         user: result,
+//         phone: phone,
+//       });
+//       console.log("No result found");
+//     }
+//   });
+
+
+
+// // LOAD FIRST PAGE CHANGE-PASSWORD FORM
+// router.get("/changePassword", (req, res) => {
+//   res.render("changePassword")
+// });
 
 
 //POST FIRST CHANGE-PASSWORD FORM FOR FIRST PAGE
 router.post("/changePassword", function (req, res) {
-const phone = req.body.phone;
 let user = {};
-const newPassword = req.body.NewPassword;
-const confirmpassword = req.body.ConfirmPassword;
-
-user.password = req.body.NewPassword;
-
-  User.findOne({ phone: phone }).then((result) => {
-    if (user) { 
-  if (newPassword !=  confirmPassword) {
-    req.flash("error_msg", `Password Mismatch`);
-    res.redirect("/changePassword");
-  } else {
-    bcrypt.genSalt(10, function (err, salt) {
-      bcrypt.hash(user.password, salt, function (err, hash) {
-        if (err) {
-          console.log(err);
-        }
-        
-        const editedPassword = {
-          $set: {
-            password: hash,
-          },
-        };
-      
-        User.updateOne({ phone: req.user.phone }, editedPassword, function (err) {
-          if (err) {
-            console.log(err);
-            return;
-          } else {
-            req.flash("success_msg", `Password Changed`);
-            res.redirect("/");
-          }
-        });
-      });
-    });
-  }});
-});
+  const newPassword = req.body.NewPassword;
+  const confirmPassword = req.body.ConfirmPassword;
   
+  User.findOne({ phone: req.body.phone }).then((isMatch) => {
+    if (isMatch) {
+      if (newPassword != confirmPassword) {
+        req.flash("error_msg", `Password Mismatch`);
+        res.redirect("/changePassword");
+      } else {
+        bcrypt.genSalt(10, function (err, salt, isMatch) {
+          bcrypt.hash(newPassword, salt, function (err, hash) {
+            if (err) {
+              console.log(err);
+            }
+
+            const editedPassword = {
+              $set: {
+                newPassword: hash,
+              },
+            };
+
+            User.updateOne({phone: req.body.phone}, editedPassword)
+              .then((edited) => {
+                if (edited) {
+                  console.log("Password Updated");
+                  req.flash("success_msg", `Password Changed`);
+                  res.redirect("/");
+                } else {
+                  req.flash("error_msg", `Error Updating Password`);
+                  res.redirect("/changePassword");
+                }
+              })
+              .catch((error) => {
+                req.flash("error_msg", `Error encounted, try agin..`);
+                res.redirect("/");
+              });
+          });
+        });
+      }
+    };
+  });
+  console.log("Incorrect Code");
+});
+
+
 
 
 //Get RegistrationPage
@@ -148,7 +203,7 @@ router.post("/register", function (req, res) {
     if (user) {
       console.log("Phone number already exists");
       req.flash("error_msg", "Phone number already exists");
-      res.redirect("/users/changePassword");
+      res.redirect("/changePassword");
     } else {
       let user = new User();
 
