@@ -101,11 +101,11 @@ let user = {};
 const newPassword = req.body.NewPassword;
 const confirmpassword = req.body.ConfirmPassword;
 
-let query = { phone: req.body.phone  };
 user.password = req.body.NewPassword;
 
-User.findOne({ phone: phone}).then((result) => {
-  if (newPassword != confirmpassword) {
+  User.findOne({ phone: phone }).then((result) => {
+    if (user) { 
+  if (newPassword !=  confirmPassword) {
     req.flash("error_msg", `Password Mismatch`);
     res.redirect("/changePassword");
   } else {
@@ -114,9 +114,14 @@ User.findOne({ phone: phone}).then((result) => {
         if (err) {
           console.log(err);
         }
-        user.password = hash;
-
-        User.updateOne(query, user, function (err) {
+        
+        const editedPassword = {
+          $set: {
+            password: hash,
+          },
+        };
+      
+        User.updateOne({ phone: req.user.phone }, editedPassword, function (err) {
           if (err) {
             console.log(err);
             return;
