@@ -3,12 +3,12 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const flash = require("connect-flash");
+const axios = require("axios");
 const fs = require("fs");
 
 let User = require("../models/user");
 const Note = require("../models/note");
 const { response } = require("express");
-
 
 //Login Form
 router.get("/", function (req, res) {
@@ -24,14 +24,13 @@ router.get("/forgotPassword", function (req, res) {
 router.post("/forgotPassword", function (req, res) {
   User.findOne({ phone: req.body.phone }).then((user) => {
     if (user) {
-      const axios = require("axios");
       const data = {
         expiry: 5,
         length: 6,
         medium: "sms",
-        message: "%otp_code%, is your verification code. Do NOT give it to anyone.",
+        message: `Hello ${user.name}, %otp_code% is your verification code. Do not share this with anyone.`,
         number: req.body.phone,
-        sender_id: "Arkesel",
+        sender_id: "NoteBookApp",
         type: "numeric",
       };
       const headers = {
@@ -41,52 +40,33 @@ router.post("/forgotPassword", function (req, res) {
         .post("https://sms.arkesel.com/api/otp/generate", data, { headers })
         .then(
           (response) => console.log(response),
-          res.redirect("/verifyCode")
-        )
+          // Pass the number as a query to the verify code route
+          res.redirect(`/verifyCode?phone=${req.body.phone}&s=${user._id}`)
+        );
     } else {
-      console.log("Invalid Phone Number");
-      req.flash("error_msg", "Invalid Phone Number");
-      res.redirect("forgotPassword");
+      req.flash("error_msg", "Phone number not registered");
+      res.redirect("/forgotPassword");
     }
   });
-  
 });
-
-
-      
 
 //Get VerificatonCode
 router.get("/verifyCode", function (req, res) {
-  res.render("./auth/verifyCode", { title: "verifyCode" });
-//   const phone = req.body.phone;
-//   User.findOne({ phone: phone })
-//     .then((result) => {
-//       if (result) {
-//         res.render("./auth/verifyCode", {
-//           phone: result,
-//           phone: phone,
-//         });
-//       } else {
-//         res.render("./auth/verifyCode", {
-//           phone: result,
-//         });
-//         console.log("No result found");
-//       }
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//     });
- }
- );
-
+  const phone = req.query.phone;
+  const userId = req.query.s; // I used 's' because I didn't want users to understand what it is
+  res.render("./auth/verifyCode", {
+    title: "verifyCode",
+    phone: phone, // Passed the phone number to the page here
+    userId: userId, // Passed the user's ID to the page here
+  });
+});
 
 //Verify Code
 router.post("/verifyCode", function (req, res) {
-  const axios = require("axios");
   const data = {
     api_key: "Y3phcXhmbHNNaFlBdEtxTmlhSno",
     code: `${req.body.otp}`,
-    number: req.body.phone,
+    number: req.body.phone, // Getting back the phone number for the verification here.
   };
   const headers = {
     "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
@@ -95,18 +75,18 @@ router.post("/verifyCode", function (req, res) {
     .post("https://sms.arkesel.com/api/otp/verify", data, { headers })
 
     .then((response) => {
-      console.log(response);
       if (response.data.code == "1104") {
         req.flash("error_msg", `Invalid Code. Try Again...`);
-        res.redirect("/verifyCode");
+        res.redirect(`/verifyCode?phone=${req.body.phone}`);
       } else if (response.data.code == "1105") {
-        req.flash("error_msg", `Code has expired`);
-        res.redirect("/verifyCode");
+        req.flash("error_msg", `OTP expired. Please request for a new one.`);
+        res.redirect("/forgotPassword");
       } else if (response.data.code == "1106") {
         req.flash("error_msg", `Internal error`);
-        res.redirect("/verifyCode");
+        res.redirect("/forgotPassword");
       } else {
-        res.redirect("/changePassword");
+        res.redirect(`/changePassword?data=${req.body.data}`); // Passing the user Id as the query
+        // I used data so that people will not be able to know that it's the user's ID
       }
     })
     .catch((error) => {
@@ -116,81 +96,69 @@ router.post("/verifyCode", function (req, res) {
 
 //Get changePassword
 router.get("/changePassword", function (req, res) {
-  res.render("./auth/changePassword", { title: "changePassword" });
-    const phone = req.body.phone;
+  const userId = req.query.data;
+  res.render("./auth/changePassword", {
+    title: "changePassword",
+    userId: userId,
+  });
 });
-//   User.findOne({ phone: phone }).then((result) => {
-//     if (result) {
-//       res.render("./auth/changePassword", {
-//         user: result,
-//         phone: phone,
-//       });
-//     } else {
-//       res.render("./user/change-password", {
-//         user: result,
-//         phone: phone,
-//       });
-//       console.log("No result found");
-//     }
-//   });
-
-
-
-// // LOAD FIRST PAGE CHANGE-PASSWORD FORM
-// router.get("/changePassword", (req, res) => {
-//   res.render("changePassword")
-// });
-
 
 //POST FIRST CHANGE-PASSWORD FORM FOR FIRST PAGE
 router.post("/changePassword", function (req, res) {
-let user = {};
+  const userId = req.body.data;
   const newPassword = req.body.NewPassword;
   const confirmPassword = req.body.ConfirmPassword;
-  
-  User.findOne({ phone: req.body.phone }).then((isMatch) => {
-    if (isMatch) {
-      if (newPassword != confirmPassword) {
-        req.flash("error_msg", `Password Mismatch`);
-        res.redirect("/changePassword");
-      } else {
-        bcrypt.genSalt(10, function (err, salt, isMatch) {
-          bcrypt.hash(newPassword, salt, function (err, hash) {
-            if (err) {
-              console.log(err);
-            }
+  try {
+    User.findOne({ _id: userId }).then((user) => {
+      // If user is found
+      if (user) {
+        if (newPassword != confirmPassword) {
+          req.flash("error_msg", `Password mismatch`);
+          res.redirect(`/changePassword?data=${req.body.data}`);
+        } else {
+          bcrypt.genSalt(10, function (err, salt, isMatch) {
+            bcrypt.hash(newPassword, salt, function (err, hash) {
+              if (err) {
+                console.log(err);
+              }
 
-            const editedPassword = {
-              $set: {
-                newPassword: hash,
-              },
-            };
+              const editedPassword = {
+                $set: {
+                  password: hash,
+                },
+              };
 
-            User.updateOne({phone: req.body.phone}, editedPassword)
-              .then((edited) => {
-                if (edited) {
-                  console.log("Password Updated");
-                  req.flash("success_msg", `Password Changed`);
-                  res.redirect("/");
-                } else {
-                  req.flash("error_msg", `Error Updating Password`);
-                  res.redirect("/changePassword");
-                }
-              })
-              .catch((error) => {
-                req.flash("error_msg", `Error encounted, try agin..`);
-                res.redirect("/");
-              });
+              User.updateOne({ _id: userId }, editedPassword)
+                .then((edited) => {
+                  if (edited) {
+                    req.flash("success_msg", `Password updated successfully`);
+                    res.redirect("/");
+                  } else {
+                    req.flash("error_msg", `Error updating password`);
+                    res.redirect("/forgotPassword");
+                  }
+                })
+                .catch((error) => {
+                  req.flash("error_msg", `Error encounted, try agin..`);
+                  res.redirect("/forgotPassword");
+                });
+            });
           });
-        });
+        }
+      } else {
+        // If user is not found
+        req.flash(
+          "error_msg",
+          `Error updating your password. Please try again`
+        );
+        res.redirect("/forgotPassword");
       }
-    };
-  });
-  console.log("Incorrect Code");
+    });
+  } catch (error) {
+    req.flash("error_msg", `Error updating your password. Please try again`);
+    res.redirect("/forgotPassword");
+  }
 });
-
-
-
 
 //Get RegistrationPage
 router.get("/register", function (req, res) {
