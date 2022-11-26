@@ -5,6 +5,7 @@ const passport = require("passport");
 const flash = require("connect-flash");
 const axios = require("axios");
 const fs = require("fs");
+const { ensureAuthenticated } = require("../config/ensureauthenticated");
 
 let User = require("../models/user");
 const Note = require("../models/note");
@@ -63,35 +64,41 @@ router.get("/verifyCode", function (req, res) {
 
 //Verify Code
 router.post("/verifyCode", function (req, res) {
-  const data = {
-    api_key: "Y3phcXhmbHNNaFlBdEtxTmlhSno",
-    code: `${req.body.otp}`,
-    number: req.body.phone, // Getting back the phone number for the verification here.
-  };
-  const headers = {
-    "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
-  };
-  axios
-    .post("https://sms.arkesel.com/api/otp/verify", data, { headers })
+  try {
+    const data = {
+      api_key: "Y3phcXhmbHNNaFlBdEtxTmlhSno",
+      code: `${req.body.otp}`,
+      number: req.body.phone, // Getting back the phone number for the verification here.
+    };
+    const headers = {
+      "api-key": "Y3phcXhmbHNNaFlBdEtxTmlhSno",
+    };
+    axios
+      .post("https://sms.arkesel.com/api/otp/verify", data, { headers })
 
-    .then((response) => {
-      if (response.data.code == "1104") {
-        req.flash("error_msg", `Invalid Code. Try Again...`);
-        res.redirect(`/verifyCode?phone=${req.body.phone}`);
-      } else if (response.data.code == "1105") {
-        req.flash("error_msg", `OTP expired. Please request for a new one.`);
-        res.redirect("/forgotPassword");
-      } else if (response.data.code == "1106") {
-        req.flash("error_msg", `Internal error`);
-        res.redirect("/forgotPassword");
-      } else {
-        res.redirect(`/changePassword?data=${req.body.data}`); // Passing the user Id as the query
-        // I used data so that people will not be able to know that it's the user's ID
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+      .then((response) => {
+        if (response.data.code == "1104") {
+          req.flash("error_msg", `Invalid Code. Try Again...`);
+          res.redirect(`/verifyCode?phone=${req.body.phone}`);
+        } else if (response.data.code == "1105") {
+          req.flash("error_msg", `OTP expired. Please request for a new one.`);
+          res.redirect("/forgotPassword");
+        } else if (response.data.code == "1106") {
+          req.flash("error_msg", `Internal error`);
+          res.redirect("/forgotPassword");
+        } else {
+          res.redirect(`/changePassword?data=${req.body.data}`); // Passing the user Id as the query
+          // I used data so that people will not be able to know that it's the user's ID
+        }
+      })
+      .catch((error) => {
+        req.flash("error_msg", `Error encounted, try agin..`);
+        res.redirect("/");
+      });
+  } catch (error) {
+    req.flash("error_msg", `Error encounted, try agin..`);
+    res.redirect("/");
+  }
 });
 
 //Get changePassword
@@ -171,7 +178,7 @@ router.post("/register", function (req, res) {
     if (user) {
       console.log("Phone number already exists");
       req.flash("error_msg", "Phone number already exists");
-      res.redirect("/changePassword");
+      res.redirect("/register");
     } else {
       let user = new User();
 
@@ -214,16 +221,16 @@ router.post("/", function (req, res, next) {
   })(req, res, next);
 });
 
-router.get("/home", function (req, res) {
+router.get("/home", ensureAuthenticated, function (req, res) {
   res.render("./user/home", { username: req.user.username });
 });
 
-router.get("/write-note", function (req, res) {
+router.get("/write-note", ensureAuthenticated, function (req, res) {
   res.render("./user/write-note");
 });
 
 //Note-saving Process
-router.post("/write-note", function (req, res) {
+router.post("/write-note", ensureAuthenticated, function (req, res) {
   if (req.files != null) {
     const image = req.files.documentimage;
     image.mv("public/documentimages/" + image.name, function (error) {
@@ -278,7 +285,7 @@ router.post("/write-note", function (req, res) {
 });
 
 // GET ALL NOTES
-router.get("/mynotes", (req, res) => {
+router.get("/mynotes", ensureAuthenticated, (req, res) => {
   Note.find()
     .sort({ createdAt: -1 })
     .then((result) => {
@@ -290,7 +297,7 @@ router.get("/mynotes", (req, res) => {
 });
 
 //DISPLAY A NOTE BY ID
-router.get("/note/:id", (req, res) => {
+router.get("/note/:id", ensureAuthenticated, (req, res) => {
   const id = req.params.id;
   Note.findById(id)
     .then((result) => {
@@ -302,7 +309,7 @@ router.get("/note/:id", (req, res) => {
 });
 
 //EDIT NOTE
-router.get("/users/edit/:id", (req, res) => {
+router.get("/users/edit/:id", ensureAuthenticated, (req, res) => {
   const id = req.params.id;
   Note.findById(id)
     .then((result) => {
@@ -314,7 +321,7 @@ router.get("/users/edit/:id", (req, res) => {
 });
 
 //Updating Note
-router.post("/users/edit/:id", function (req, res) {
+router.post("/users/edit/:id", ensureAuthenticated, function (req, res) {
   if (req.files != null) {
     const image = req.files.documentimage;
     image.mv("public/documentimages/" + image.name, function (error) {
@@ -363,7 +370,7 @@ router.post("/users/edit/:id", function (req, res) {
 });
 
 //DELETING A NOTE BY ID
-router.delete("/users/note/:id", (req, res) => {
+router.delete("/users/note/:id", ensureAuthenticated, (req, res) => {
   const id = req.params.id;
   Note.findByIdAndDelete(id)
     .then((result) => {
@@ -392,7 +399,7 @@ router.get("/logout", function (req, res) {
 });
 
 //LOAD EDIT FORM
-router.get("/update-details", (req, res) => {
+router.get("/update-details", ensureAuthenticated, (req, res) => {
   const username = req.user.username;
   const phone = req.user.phone;
   User.findOne({ phone: phone }).then((result) => {
@@ -411,7 +418,7 @@ router.get("/update-details", (req, res) => {
   });
 });
 
-router.post("/update-details", function (req, res) {
+router.post("/update-details", ensureAuthenticated, function (req, res) {
   let user = {};
 
   user.name = req.body.name;
@@ -434,7 +441,7 @@ router.post("/update-details", function (req, res) {
 });
 
 // LOAD CHANGE-PASSWORD FORM
-router.get("/change-password", (req, res) => {
+router.get("/change-password", ensureAuthenticated, (req, res) => {
   const username = req.user.username;
   const phone = req.user.phone;
   User.findOne({ phone: phone }).then((result) => {
@@ -454,7 +461,7 @@ router.get("/change-password", (req, res) => {
 });
 
 // POST UPDATED PASSWORD
-router.post("/change-password", function (req, res) {
+router.post("/change-password", ensureAuthenticated, function (req, res) {
   try {
     let user = {};
 
